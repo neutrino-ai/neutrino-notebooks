@@ -120,7 +120,7 @@ def kmeans_clustering(data: list[list[float]], n_clusters: int):
 ### Parameters
 
 **http:** The HTTP verb for the request (GET, POST, PUT, DELETE, PATCH).  
-**endpoint:** The API endpoint URL. 
+**endpoint:** The API endpoint URL.  
 **body:** The request body fields and their types.  
 **resp:** The expected response fields and their types.  
 **query:** The specified query parameters for the request. *i.e ?key=value&key2=value2*   
