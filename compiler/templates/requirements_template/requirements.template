@@ -1,0 +1,16 @@
+numpy
+scipy
+scikit-learn
+matplotlib
+pandas
+PyYAML
+Jinja2
+gunicorn==20.1.0
+python-dotenv
+uvloop
+httptools
+fastapi
+uvicorn
+python-dotenv
+websockets
+APScheduler

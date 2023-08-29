@@ -1,0 +1,47 @@
+# .gitignore file
+
+# Ignore Python build artifacts
+__pycache__/
+/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+*.sqlite
+
+# Ignore virtual environments
+env/
+
+# Ignore IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.suo
+*.user
+*.bak
+/venv/
+venv/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore Flask file
+instance/
+*.env
+*.flaskenv
+flask_session/
+
+# Ignore local MongoDB data
+/data/
+
+# Ignore build folders
+/build/
+```

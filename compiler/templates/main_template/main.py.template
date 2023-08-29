@@ -1,0 +1,27 @@
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from config import config
+from scheduler import scheduler
+{{ import_root_routers }}
+
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=config.CORS_ORIGIN_WHITELIST,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+{{ register_root_routers }}
+
+@app.on_event("startup")
+def startup_event():
+    scheduler.start()
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=config.API_PORT)

@@ -1,0 +1,13 @@
+click
+nbformat
+fastapi
+uvicorn~=0.23.1
+pydantic
+numpy
+autopep8
+python-dotenv
+termcolor
+websockets
+APScheduler
+Jinja2
+PyYAML
