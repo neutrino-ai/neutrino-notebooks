@@ -44,4 +44,6 @@ flask_session/
 
 # Ignore build folders
 /build/
+
 ```
+
