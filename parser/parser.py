@@ -1,11 +1,18 @@
 import re
+from typing import Union
+
 import autopep8
 import nbformat
 import yaml
+from termcolor import colored
 
 from parser.cells.scheduled_cell import ScheduledCell
 from parser.cells.websocket_cell import WebSocketCell
 from .cells import Cell, CodeCell, HttpCell
+
+
+def split_types(s: str) -> list[str]:
+    return [x.strip() for x in re.split(r',\s*(?![^[\]{}]*[\]{}])', s)]
 
 
 def clean_source(lines: list[str]) -> tuple[list[str], list[str]]:
@@ -62,7 +69,7 @@ def parse_cell(cell_content: dict) -> Cell | None:
         return CodeCell(source=source)
 
 
-def parse_http_cell(declaration_lines: list[str], source_lines: list[str]) -> HttpCell | None:
+def parse_http_cell(declaration_lines: list[str], source_lines: list[str]) -> Union['HttpCell', None]:
     http_verb, endpoint = None, None
     cell_dict = {}
 
@@ -82,21 +89,20 @@ def parse_http_cell(declaration_lines: list[str], source_lines: list[str]) -> Ht
         print(f"Failed to parse YAML: {e}")
         return None
 
-    # Check if Body or Resp is a list, leave it as is. If not, convert it to list.
     for key in ['Body', 'Resp']:
         if key in cell_dict:
             if isinstance(cell_dict[key], str):
-                cell_dict[key] = cell_dict[key].split(',')
+                cell_dict[key] = split_types(cell_dict[key])
 
     func_body = "\n".join(source_lines).strip()
 
-    if func_body and (http_verb and endpoint):  # Checking if both are not None
+    if func_body and (http_verb and endpoint):
         return HttpCell(
             http=http_verb,
-            body=cell_dict.get('Body'),
-            resp=cell_dict.get('Resp'),
-            query=cell_dict.get('Query'),
-            headers=cell_dict.get('Headers'),
+            body=cell_dict.get('body'),
+            resp=cell_dict.get('resp'),
+            query=cell_dict.get('query'),
+            headers=cell_dict.get('headers'),
             endpoint=endpoint,
             func_body=func_body
         )
@@ -131,8 +137,8 @@ def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str]) 
         return WebSocketCell(
             endpoint=endpoint,
             func_body=func_body,
-            query=cell_dict.get('Query'),
-            headers=cell_dict.get('Headers')
+            query=cell_dict.get('query'),
+            headers=cell_dict.get('headers')
         )
 
 
@@ -147,9 +153,9 @@ def parse_scheduled_cell(declaration_lines: list[str], source_lines: list[str]) 
     for line in declaration_lines:
         if ':' in line:
             key, value = map(str.strip, line.split(':', 1))
-            if key == 'Cron':
+            if key == 'cron':
                 cron = value
-            elif key == 'Interval':
+            elif key == 'interval':
                 interval = value
         else:
             print(f"Warning: Invalid line in schedule declaration: {line}")
@@ -165,8 +171,15 @@ def parse_scheduled_cell(declaration_lines: list[str], source_lines: list[str]) 
 
 
 def parse_notebook_cells(filepath: str) -> list[str]:
-    with open(filepath, 'r', encoding='utf-8') as f:
-        notebook = nbformat.read(f, as_version=4)
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            notebook = nbformat.read(f, as_version=4)
+    except FileNotFoundError:
+        print(colored(f"Error: Notebook file not found: {filepath}", 'red'))
+        return []
+    except nbformat.reader.NotJSONError:
+        print(colored(f"Error: Notebook file is not a valid JSON file: {filepath}", 'red'))
+        return []
 
     parsed_cells = []
     for cell in notebook['cells']:
@@ -189,6 +202,7 @@ def compile_notebook_to_py(filepath: str) -> str:
         'from fastapi import APIRouter, HTTPException, WebSocket\n',
         'from pydantic import BaseModel\n',
         'from scheduler import scheduler\n',
+        'from typing import List, Dict, Optional, Union, Any\n',
         'import json\n',
         'router = APIRouter()\n',
     ]

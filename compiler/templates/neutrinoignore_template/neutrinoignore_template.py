@@ -1,4 +1,4 @@
-from compiler.templates import Template
+from compiler.templates.template import Template
 
 
 class NeutrinoIgnoreTemplate(Template):

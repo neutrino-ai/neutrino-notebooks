@@ -1,8 +1,8 @@
 import hashlib
 import os
+import subprocess
 from collections import defaultdict
 from pathlib import Path
-import subprocess
 
 from compiler.templates import DockerfileTemplate, SchedulerTemplate, ConfigTemplate, MainTemplate
 
@@ -86,7 +86,8 @@ def merge_requirements(stock_path: str, user_path: str, output_path: str) -> Non
             f.write(f"{pkg}{'==' + version if version else ''}\n")
 
 
-def create_boilerplate_files(build_dir: str, boilerplate_files: list[str], root_dir: Path, ignore_list: list[str]=None) -> None:
+def create_boilerplate_files(build_dir: str, boilerplate_files: list[str], root_dir: Path,
+                             ignore_list: list[str] = None) -> None:
     """
     Creates boilerplate files needed for a FastAPI app.
 

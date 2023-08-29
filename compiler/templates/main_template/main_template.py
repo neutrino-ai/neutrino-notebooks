@@ -1,7 +1,8 @@
 from pathlib import Path
+
+from compiler.ignore_handler import should_ignore_file
 from compiler.templates.template import Template
 from util.strings import to_snake_case
-from compiler.ignore_handler import should_ignore_file
 
 
 class MainTemplate(Template):

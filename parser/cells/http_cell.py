@@ -1,7 +1,10 @@
 import re
+
 from termcolor import colored
+
 from util.ast import get_function_name_from_ast, get_function_args_from_ast, is_async_function
 from util.strings import snake_to_pascal
+
 
 class HttpCell:
     def __init__(
@@ -55,7 +58,13 @@ class HttpCell:
 
     @staticmethod
     def _field_to_py_str(field: str) -> str:
-        name, type_ = field.split(":")
+        if ":" not in field:
+            print(colored(f"WARNING: No type hint provided for field: {field}. Defaulting to 'Any'.", 'yellow'))
+            name = field.strip()
+            type_ = 'Any'
+        else:
+            name, type_ = field.split(":")
+
         is_optional = '?' in type_
         type_ = type_.replace('?', '').replace('!', '').strip()
         return f"    {name.strip()}: {type_ + ' | None' if is_optional else type_}"
@@ -90,7 +99,8 @@ class HttpCell:
 
         func_name = get_function_name_from_ast(self.func_body)
         pascal_func_name = snake_to_pascal(func_name) if func_name else None
-        model_names = [f"{pascal_func_name}{suffix}" if pascal_func_name else suffix for suffix in ["RequestBody", "ResponseModel"]]
+        model_names = [f"{pascal_func_name}{suffix}" if pascal_func_name else suffix for suffix in
+                       ["RequestBody", "ResponseModel"]]
 
         endpoint_def = []
         for model_name, fields in zip(model_names, [self.body, self.resp]):

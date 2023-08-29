@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from compiler.templates.template import Template
 from util.strings import to_snake_case
 
@@ -9,7 +10,10 @@ class InitPyTemplate(Template):
         route_files = []
 
         # For files directly in the directory
-        root_files = [file for file in directory.glob("*.ipynb") if file.stem != "__init__"]
+        root_files = [
+            file for file in directory.glob("*.ipynb")
+            if file.stem != "__init__" and not file.name.endswith("sandbox.ipynb")
+        ]
         for root_file in root_files:
             filename = to_snake_case(root_file.stem)
             router_name = f"{filename}_router"

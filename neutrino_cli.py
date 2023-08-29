@@ -2,14 +2,15 @@
 
 import os
 import subprocess
-from pathlib import Path
-from termcolor import colored
 import traceback
-import click
+from pathlib import Path
 
-from compiler.build_setup import install_requirements_from_build, hash_file, requirements_changed
-from compiler.compiler import compile_notebooks_into_build, merge_requirements, create_boilerplate_files, \
-    create_dest_dir_if_not_exists, format_python_files_in_dir, merge_project_requirements, \
+import click
+from termcolor import colored
+
+from compiler.build_setup import hash_file, requirements_changed
+from compiler.compiler import compile_notebooks_into_build, create_dest_dir_if_not_exists, format_python_files_in_dir, \
+    merge_project_requirements, \
     create_boilerplate_files_in_dir
 from compiler.ignore_handler import read_ignore_list
 from compiler.templates import NeutrinoIgnoreTemplate

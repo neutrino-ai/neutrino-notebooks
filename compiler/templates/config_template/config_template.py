@@ -1,4 +1,4 @@
-from compiler.templates import Template
+from compiler.templates.template import Template
 
 
 class ConfigTemplate(Template):
@@ -9,5 +9,3 @@ class ConfigTemplate(Template):
     @classmethod
     def get_template_name(cls) -> str:
         return 'config.py.template'
-
-

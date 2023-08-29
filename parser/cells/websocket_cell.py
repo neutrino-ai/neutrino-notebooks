@@ -1,15 +1,18 @@
-from typing import List, Union
 import re
+from typing import List, Union
+
 from termcolor import colored
+
 from util.ast import get_function_name_from_ast, get_function_args_from_ast
+
 
 class WebSocketCell:
     def __init__(
-        self,
-        endpoint: str,
-        func_body: str,
-        query: Union[str, List[str]] = None,
-        headers: Union[str, List[str]] = None,
+            self,
+            endpoint: str,
+            func_body: str,
+            query: Union[str, List[str]] = None,
+            headers: Union[str, List[str]] = None,
     ):
         self.endpoint = endpoint
         self.query = self._parse_fields(query)
@@ -107,4 +110,3 @@ class WebSocketCell:
             return type_hint[:-1]
         else:
             return type_hint
-

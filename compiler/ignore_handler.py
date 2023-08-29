@@ -1,6 +1,5 @@
 import os
-from fnmatch import fnmatch, fnmatchcase
-from pathlib import Path
+from fnmatch import fnmatchcase
 
 
 def read_ignore_list(ignore_file_path: str = '.neutrinoignore') -> list[str]:
@@ -46,4 +45,3 @@ def should_ignore_file(file_path: str, ignore_list: list[str]) -> bool:
             return True
 
     return False
-
