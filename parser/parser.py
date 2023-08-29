@@ -11,9 +11,6 @@ from parser.cells.websocket_cell import WebSocketCell
 from .cells import Cell, CodeCell, HttpCell
 
 
-def split_types(s: str) -> list[str]:
-    return [x.strip() for x in re.split(r',\s*(?![^[\]{}]*[\]{}])', s)]
-
 
 def clean_source(lines: list[str]) -> tuple[list[str], list[str]]:
     """
@@ -46,7 +43,7 @@ def clean_source(lines: list[str]) -> tuple[list[str], list[str]]:
     return declaration_lines, source_lines
 
 
-def parse_cell(cell_content: dict) -> Cell | None:
+def parse_cell(cell_content: dict, filepath: str) -> Cell | None:
     source = cell_content['source']
     lines = source.split("\n")
     cleaned_declaration_lines, source_lines = clean_source(lines)
@@ -55,21 +52,48 @@ def parse_cell(cell_content: dict) -> Cell | None:
         return None
 
     first_line = cleaned_declaration_lines[0] if cleaned_declaration_lines else None
+
     if first_line and re.match(r'@HTTP', first_line):
         if first_line.strip() == '@HTTP':
             cleaned_declaration_lines.pop(0)  # Remove the line entirely if it only contains @HTTP
         else:
             cleaned_declaration_lines[0] = first_line.replace('@HTTP ', '')  # Remove @HTTP but keep the rest
-        return parse_http_cell(cleaned_declaration_lines, source_lines)
+        return parse_http_cell(cleaned_declaration_lines, source_lines, filepath=filepath)
+
     elif first_line and re.match(r'@WS', first_line):  # New condition for WebSocket
-        return parse_websocket_cell(cleaned_declaration_lines, source_lines)
-    elif first_line and re.match(r'@SCHEDULED', first_line):
-        return parse_scheduled_cell(cleaned_declaration_lines, source_lines)
+        return parse_websocket_cell(cleaned_declaration_lines, source_lines, filepath=filepath)
+
+    elif first_line and re.match(r'@SCHEDULE', first_line):
+        return parse_scheduled_cell(cleaned_declaration_lines, source_lines, filepath=filepath)
+
     else:
         return CodeCell(source=source)
 
 
-def parse_http_cell(declaration_lines: list[str], source_lines: list[str]) -> Union['HttpCell', None]:
+def split_types(s: str) -> list[str]:
+    """
+    Split a string of types into a list of types.
+    Example: "int, str, list[int]" -> ["int", "str", "list[int]"]
+    :param s:
+    :return:
+    """
+    stack = []
+    start = 0
+    result = []
+    for i, c in enumerate(s):
+        if c in ['[', '{']:
+            stack.append(c)
+        elif c in [']', '}']:
+            stack.pop()
+        elif c == ',':
+            if not stack:
+                result.append(s[start:i].strip())
+                start = i + 1
+    result.append(s[start:].strip())
+    return result
+
+
+def parse_http_cell(declaration_lines: list[str], source_lines: list[str], filepath: str) -> Union['HttpCell', None]:
     http_verb, endpoint = None, None
     cell_dict = {}
 
@@ -86,10 +110,10 @@ def parse_http_cell(declaration_lines: list[str], source_lines: list[str]) -> Un
         if parsed_yaml:
             cell_dict.update(parsed_yaml)
     except yaml.YAMLError as e:
-        print(f"Failed to parse YAML: {e}")
+        print(colored(f"Error in {filepath}:\nFailed to parse YAML: {e}", "red"))
         return None
 
-    for key in ['Body', 'Resp']:
+    for key in ['body', 'resp']:
         if key in cell_dict:
             if isinstance(cell_dict[key], str):
                 cell_dict[key] = split_types(cell_dict[key])
@@ -97,18 +121,22 @@ def parse_http_cell(declaration_lines: list[str], source_lines: list[str]) -> Un
     func_body = "\n".join(source_lines).strip()
 
     if func_body and (http_verb and endpoint):
-        return HttpCell(
-            http=http_verb,
-            body=cell_dict.get('body'),
-            resp=cell_dict.get('resp'),
-            query=cell_dict.get('query'),
-            headers=cell_dict.get('headers'),
-            endpoint=endpoint,
-            func_body=func_body
-        )
+        try:
+            return HttpCell(
+                http=http_verb,
+                body=cell_dict.get('body'),
+                resp=cell_dict.get('resp'),
+                query=cell_dict.get('query'),
+                headers=cell_dict.get('headers'),
+                endpoint=endpoint,
+                func_body=func_body
+            )
+        except Exception as e:
+            print(colored(f"Error parsing cell in {filepath}:\n{e}", "red"))
+            return None
 
 
-def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str]) -> WebSocketCell | None:
+def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str], filepath: str) -> WebSocketCell | None:
     endpoint = None
     cell_dict = {}
 
@@ -122,11 +150,11 @@ def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str]) 
         if parsed_yaml:
             cell_dict.update(parsed_yaml)
     except yaml.YAMLError as e:
-        print(f"Failed to parse YAML: {e}")
+        print(colored(f"Error in {filepath}:\nFailed to parse YAML: {e}", "red"))
         return None
 
     # Check if Query or Headers is a list, leave it as is. If not, convert it to list.
-    for key in ['Query', 'Headers']:
+    for key in ['query', 'headers']:
         if key in cell_dict:
             if isinstance(cell_dict[key], str):
                 cell_dict[key] = cell_dict[key].split(',')
@@ -134,15 +162,19 @@ def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str]) 
     func_body = "\n".join(source_lines).strip()
 
     if func_body and endpoint:
-        return WebSocketCell(
-            endpoint=endpoint,
-            func_body=func_body,
-            query=cell_dict.get('query'),
-            headers=cell_dict.get('headers')
-        )
+        try:
+            return WebSocketCell(
+                endpoint=endpoint,
+                func_body=func_body,
+                query=cell_dict.get('query'),
+                headers=cell_dict.get('headers')
+            )
+        except Exception as e:
+            print(colored(f"Error parsing cell in {filepath}:\n{e}", "red"))
+            return None
 
 
-def parse_scheduled_cell(declaration_lines: list[str], source_lines: list[str]) -> ScheduledCell | None:
+def parse_scheduled_cell(declaration_lines: list[str], source_lines: list[str], filepath: str) -> ScheduledCell | None:
     cron = None
     interval = None
 
@@ -158,16 +190,20 @@ def parse_scheduled_cell(declaration_lines: list[str], source_lines: list[str]) 
             elif key == 'interval':
                 interval = value
         else:
-            print(f"Warning: Invalid line in schedule declaration: {line}")
+            print(colored(f"Warning in {filepath}:\nInvalid line in schedule declaration: {line}", "red"))
 
     func_body = "\n".join(source_lines).strip()
 
     if func_body and (cron or interval):
-        return ScheduledCell(
-            func_body=func_body,
-            cron=cron,
-            interval=interval
-        )
+        try:
+            return ScheduledCell(
+                func_body=func_body,
+                cron=cron,
+                interval=interval
+            )
+        except Exception as e:
+            print(colored(f"Error parsing cell in {filepath}:\n{e}", "red"))
+            return None
 
 
 def parse_notebook_cells(filepath: str) -> list[str]:
@@ -184,7 +220,7 @@ def parse_notebook_cells(filepath: str) -> list[str]:
     parsed_cells = []
     for cell in notebook['cells']:
         if cell['cell_type'] == 'code':
-            parsed_cell = parse_cell(cell)
+            parsed_cell = parse_cell(cell, filepath=filepath)
             if parsed_cell:
                 parsed_cells.append(parsed_cell)
 
