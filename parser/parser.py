@@ -44,6 +44,17 @@ def clean_source(lines: list[str]) -> tuple[list[str], list[str]]:
 
 
 def parse_cell(cell_content: dict, filepath: str) -> Cell | None:
+    """
+    Parses a Jupyter notebook cell to determine its type and content.
+
+    Parameters:
+    - cell_content (dict): A dictionary containing the cell content. Expects 'source' to be a key in the dict.
+    - filepath (str): The path of the file containing the cell, used for error reporting.
+
+    Returns:
+    - Cell | None: Returns an object of type HttpCell, WebSocketCell, ScheduledCell, or CodeCell based on the
+                   cell content. Returns None if the cell is not one of these types.
+    """
     source = cell_content['source']
     lines = source.split("\n")
     cleaned_declaration_lines, source_lines = clean_source(lines)
@@ -60,7 +71,7 @@ def parse_cell(cell_content: dict, filepath: str) -> Cell | None:
             cleaned_declaration_lines[0] = first_line.replace('@HTTP ', '')  # Remove @HTTP but keep the rest
         return parse_http_cell(cleaned_declaration_lines, source_lines, filepath=filepath)
 
-    elif first_line and re.match(r'@WS', first_line):  # New condition for WebSocket
+    elif first_line and re.match(r'@WS', first_line):
         return parse_websocket_cell(cleaned_declaration_lines, source_lines, filepath=filepath)
 
     elif first_line and re.match(r'@SCHEDULE', first_line):
@@ -136,7 +147,7 @@ def parse_http_cell(declaration_lines: list[str], source_lines: list[str], filep
             return None
 
 
-def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str], filepath: str) -> WebSocketCell | None:
+def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str], filepath: str) -> Union[WebSocketCell, None]:
     endpoint = None
     cell_dict = {}
 
@@ -150,14 +161,15 @@ def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str], 
         if parsed_yaml:
             cell_dict.update(parsed_yaml)
     except yaml.YAMLError as e:
-        print(colored(f"Error in {filepath}:\nFailed to parse YAML: {e}", "red"))
+        print(f"Error in {filepath}:\nFailed to parse YAML: {e}")
         return None
 
-    # Check if Query or Headers is a list, leave it as is. If not, convert it to list.
-    for key in ['query', 'headers']:
+    for key in ['query', 'headers', 'message']:
         if key in cell_dict:
             if isinstance(cell_dict[key], str):
-                cell_dict[key] = cell_dict[key].split(',')
+                cell_dict[key] = split_types(cell_dict[key])
+
+    validate_flag = cell_dict.get('validate', False)
 
     func_body = "\n".join(source_lines).strip()
 
@@ -166,11 +178,14 @@ def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str], 
             return WebSocketCell(
                 endpoint=endpoint,
                 func_body=func_body,
+                ws_type=cell_dict.get('type', 'event'),
+                message_schema=cell_dict.get('message'),
                 query=cell_dict.get('query'),
-                headers=cell_dict.get('headers')
+                headers=cell_dict.get('headers'),
+                validate_message_schema=validate_flag,
             )
         except Exception as e:
-            print(colored(f"Error parsing cell in {filepath}:\n{e}", "red"))
+            print(f"Error parsing cell in {filepath}:\n{e}")
             return None
 
 
@@ -236,9 +251,9 @@ def compile_notebook_to_py(filepath: str) -> str:
 
     output_lines = [
         'from fastapi import APIRouter, HTTPException, WebSocket\n',
-        'from pydantic import BaseModel\n',
+        'from pydantic import BaseModel, ValidationError\n',
         'from scheduler import scheduler\n',
-        'from typing import List, Dict, Optional, Union, Any\n',
+        'from typing import List, Dict, Optional, Union, Any, AsyncGenerator, Callable\n',
         'import json\n',
         'router = APIRouter()\n',
     ]
