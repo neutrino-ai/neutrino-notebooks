@@ -17,7 +17,7 @@ class InitPyTemplate(Template):
         for root_file in root_files:
             filename = to_snake_case(root_file.stem)
             router_name = f"{filename}_router"
-            url_prefix = f'/{filename}' if filename.lower() != 'routes' else ''
+            url_prefix = f'/{filename}' if not filename.lower().endswith('routes') else ''
             route_files.append((filename, router_name, url_prefix))
 
         # For subdirectories
@@ -29,7 +29,7 @@ class InitPyTemplate(Template):
                 if init_file.exists() or sub_nested_routers:
                     subdir_name = to_snake_case(subdir.name)
                     router_name = f'{subdir_name}_router'
-                    url_prefix = f'/{subdir_name}' if subdir_name != 'routes' else ''
+                    url_prefix = f'/{subdir_name}' if not subdir_name.lower().endswith('routes') else ''
                     nested_routers.append((subdir_name, router_name, url_prefix))
 
         template_vars = {

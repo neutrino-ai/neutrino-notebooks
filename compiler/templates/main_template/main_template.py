@@ -26,7 +26,7 @@ class MainTemplate(Template):
 
                 dir_router_name = f"{subdir_name}_router"
                 import_root_routers.append(f"from {subdir_name} import router as {dir_router_name}")
-                url_prefix = f'/{subdir_name}' if subdir_name != 'routes' else ''
+                url_prefix = f'/{subdir_name}' if subdir_name.endswith('_routes') else ''
                 register_root_routers.append(f"app.include_router({dir_router_name}, prefix='{url_prefix}')")
 
         template_variables = {
