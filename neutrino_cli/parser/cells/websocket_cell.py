@@ -1,7 +1,6 @@
-import re
 from typing import List, Union
 from termcolor import colored
-from util.ast import get_function_name_from_ast, get_function_args_from_ast, is_async_function
+from neutrino_cli.util.ast import get_function_name_from_ast, is_async_function
 
 class WebSocketCell:
     def __init__(

@@ -1,4 +1,4 @@
-from compiler.templates.template import Template
+from neutrino_cli.compiler.templates.template import Template
 
 
 class SchedulerTemplate(Template):

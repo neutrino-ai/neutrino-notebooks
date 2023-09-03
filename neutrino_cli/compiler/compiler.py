@@ -3,10 +3,10 @@ from pathlib import Path
 
 import autopep8
 
-from compiler.build_setup import merge_requirements, create_boilerplate_files
-from compiler.file_utilities import create_init_file, create_dest_dir_if_not_exists, copy_files
-from compiler.ignore_handler import should_ignore_file
-from compiler.templates import RequirementsTemplate
+from neutrino_cli.compiler.build_setup import merge_requirements, create_boilerplate_files
+from neutrino_cli.compiler.file_utilities import create_init_file, create_dest_dir_if_not_exists, copy_files
+from neutrino_cli.compiler.ignore_handler import should_ignore_file
+from neutrino_cli.compiler.templates import RequirementsTemplate
 
 
 def compile_notebooks_into_build(source_path: str, build_dir: str, ignore_list: list[str] = None):

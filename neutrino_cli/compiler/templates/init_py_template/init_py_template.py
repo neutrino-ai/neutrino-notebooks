@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from compiler.templates.template import Template
-from util.strings import to_snake_case
+from neutrino_cli.compiler.templates.template import Template
+from neutrino_cli.util.strings import to_snake_case
 
 
 class InitPyTemplate(Template):
