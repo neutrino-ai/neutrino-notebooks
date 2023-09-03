@@ -25,7 +25,7 @@ def cli():
 @click.command()
 def init():
     """Initialize a new Neutrino project."""
-    ignore_file_path = '../.neutrinoignore'
+    ignore_file_path = '.neutrinoignore'
 
     # Check if .neutrinoignore already exists
     if os.path.exists(ignore_file_path):
