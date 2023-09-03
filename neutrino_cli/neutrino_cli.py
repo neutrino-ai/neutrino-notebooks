@@ -43,6 +43,7 @@ def init():
 
     except Exception as e:
         print(colored(f"An unexpected error occurred: {e}", 'red'))
+        print(traceback.format_exc())
 
 
 @click.command()
