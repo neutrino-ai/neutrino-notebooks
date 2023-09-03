@@ -4,7 +4,7 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 
-from compiler.templates import DockerfileTemplate, SchedulerTemplate, ConfigTemplate, MainTemplate
+from neutrino_cli.compiler.templates import DockerfileTemplate, SchedulerTemplate, ConfigTemplate, MainTemplate
 
 
 def hash_file(file_path: str) -> str:

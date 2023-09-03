@@ -6,8 +6,8 @@ import nbformat
 import yaml
 from termcolor import colored
 
-from parser.cells.scheduled_cell import ScheduledCell
-from parser.cells.websocket_cell import WebSocketCell
+from neutrino_cli.parser.cells.scheduled_cell import ScheduledCell
+from neutrino_cli.parser.cells.websocket_cell import WebSocketCell
 from .cells import Cell, CodeCell, HttpCell
 
 

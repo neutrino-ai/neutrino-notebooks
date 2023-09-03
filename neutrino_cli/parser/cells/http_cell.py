@@ -2,8 +2,8 @@ import re
 
 from termcolor import colored
 
-from util.ast import get_function_name_from_ast, get_function_args_from_ast, is_async_function
-from util.strings import snake_to_pascal
+from neutrino_cli.util.ast import get_function_name_from_ast, get_function_args_from_ast, is_async_function
+from neutrino_cli.util.strings import snake_to_pascal
 
 
 class HttpCell:

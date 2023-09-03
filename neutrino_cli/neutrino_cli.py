@@ -8,12 +8,12 @@ from pathlib import Path
 import click
 from termcolor import colored
 
-from compiler.build_setup import hash_file, requirements_changed
-from compiler.compiler import compile_notebooks_into_build, create_dest_dir_if_not_exists, format_python_files_in_dir, \
+from neutrino_cli.compiler.build_setup import hash_file, requirements_changed
+from neutrino_cli.compiler.compiler import compile_notebooks_into_build, create_dest_dir_if_not_exists, format_python_files_in_dir, \
     merge_project_requirements, \
     create_boilerplate_files_in_dir
-from compiler.ignore_handler import read_ignore_list
-from compiler.templates import NeutrinoIgnoreTemplate
+from neutrino_cli.compiler.ignore_handler import read_ignore_list
+from neutrino_cli.compiler.templates import NeutrinoIgnoreTemplate
 
 
 @click.group()
@@ -25,7 +25,7 @@ def cli():
 @click.command()
 def init():
     """Initialize a new Neutrino project."""
-    ignore_file_path = '.neutrinoignore'
+    ignore_file_path = '../.neutrinoignore'
 
     # Check if .neutrinoignore already exists
     if os.path.exists(ignore_file_path):
@@ -62,7 +62,7 @@ def build(source: str):
         create_boilerplate_files_in_dir(source, build_dir, ignore_list=ignore_list)
 
         # Hash the requirements.txt file
-        requirements_path = os.path.join(build_dir, 'requirements.txt')
+        requirements_path = os.path.join(build_dir, '../requirements.txt')
         requirements_hash = hash_file(requirements_path)
 
         # Save the hash for future comparison

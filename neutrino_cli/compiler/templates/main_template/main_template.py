@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from compiler.ignore_handler import should_ignore_file
-from compiler.templates.template import Template
-from util.strings import to_snake_case
+from neutrino_cli.compiler.ignore_handler import should_ignore_file
+from neutrino_cli.compiler.templates.template import Template
+from neutrino_cli.util.strings import to_snake_case
 
 
 class MainTemplate(Template):

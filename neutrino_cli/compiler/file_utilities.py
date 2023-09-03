@@ -2,9 +2,9 @@ import os
 import shutil
 from pathlib import Path
 
-from compiler.ignore_handler import should_ignore_file
-from compiler.templates import InitPyTemplate
-from parser.parser import compile_notebook_to_py
+from neutrino_cli.compiler.ignore_handler import should_ignore_file
+from neutrino_cli.compiler.templates import InitPyTemplate
+from neutrino_cli.parser.parser import compile_notebook_to_py
 
 
 def create_dest_dir_if_not_exists(dest_dir: Path):
