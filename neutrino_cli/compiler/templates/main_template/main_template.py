@@ -15,7 +15,7 @@ from scheduler import scheduler
 {{ import_root_routers }}
 
 
-app = FastAPI(title="{{project_name}}")
+app = FastAPI(title="{{project_name}}", version="{{version}}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -66,7 +66,8 @@ class MainTemplate(Template):
         template_vars = {
             "import_root_routers": "\n".join(import_root_routers),
             "register_root_routers": "\n".join(register_root_routers),
-            "project_name": config_data.get('project_name', 'Neutrino Project')
+            "project_name": config_data.get('project_name', 'Neutrino Project'),
+            "version": config_data.get('version', '0.0.1'),
         }
 
         super().__init__(template_str=template, template_vars=template_vars)
