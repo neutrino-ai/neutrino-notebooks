@@ -11,6 +11,10 @@ image that can be deployed to any cloud provider.
 
 ### Commands
 
+`neutrino init`
+
+This command will create the necessary files to compile your notebooks.
+
 `neutrino build` 
 
 This command will compile the notebooks into a /build folder containing a dockerized FastAPI application. 
