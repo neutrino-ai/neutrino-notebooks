@@ -50,7 +50,7 @@ class HttpCell:
                           'yellow'))
 
     @staticmethod
-    def _parse_fields(fields: str | list[str]) -> list[str]:
+    def _parse_fields(fields: Union[str, list[str]]) -> list[str]:
         return fields if isinstance(fields, list) else fields.split(',') if fields else []
 
     def _generate_pydantic_model(self, fields: list[str], class_name: str) -> str:

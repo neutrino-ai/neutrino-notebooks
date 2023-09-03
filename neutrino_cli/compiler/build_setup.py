@@ -3,6 +3,7 @@ import os
 import subprocess
 from collections import defaultdict
 from pathlib import Path
+from typing import Union
 
 from neutrino_cli.compiler.templates import DockerfileTemplate, SchedulerTemplate, ConfigTemplate, MainTemplate
 
