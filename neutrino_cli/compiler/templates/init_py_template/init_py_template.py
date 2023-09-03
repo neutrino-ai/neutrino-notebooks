@@ -4,6 +4,26 @@ from neutrino_cli.compiler.templates.template import Template
 from neutrino_cli.util.strings import to_snake_case
 
 
+template = """
+from fastapi import APIRouter
+
+{% for filename, router_name, _ in route_files %}
+from .{{ filename }} import router as {{ router_name }}
+{% endfor %}
+{% for dir_name, router_name, _ in nested_routers %}
+from .{{ dir_name }} import router as {{ router_name }}
+{% endfor %}
+
+router = APIRouter()
+
+{% for _, router_name, url_prefix in route_files %}
+router.include_router({{ router_name }}, prefix="{{ url_prefix }}")
+{% endfor %}
+{% for _, router_name, url_prefix in nested_routers %}
+router.include_router({{ router_name }}, prefix="{{ url_prefix }}")
+{% endfor %}
+"""
+
 class InitPyTemplate(Template):
     def __init__(self, directory: Path):
         nested_routers = []
@@ -37,4 +57,4 @@ class InitPyTemplate(Template):
             "route_files": route_files,
         }
 
-        super().__init__('init_py_template', 'init.py.template', template_vars)
+        super().__init__(template_str=template, template_vars=template_vars)

@@ -88,7 +88,7 @@ def merge_requirements(stock_path: str, user_path: str, output_path: str) -> Non
 
 
 def create_boilerplate_files(build_dir: str, boilerplate_files: list[str], root_dir: Path,
-                             ignore_list: list[str] = None) -> None:
+                             ignore_list: list[str] = None, config_data: dict = None) -> None:
     """
     Creates boilerplate files needed for a FastAPI app.
 
@@ -96,20 +96,21 @@ def create_boilerplate_files(build_dir: str, boilerplate_files: list[str], root_
     :param build_dir: Directory where the build resides
     :param boilerplate_files: List of boilerplate files to be created
     :param root_dir: Root directory of the project
+    :param config_data: Project config data
     """
     for file in boilerplate_files:
         file_path = os.path.join(build_dir, file)
         with open(file_path, 'w') as f:
             if file == 'main.py':
-                app_main_template = MainTemplate(root_dir, ignore_list=ignore_list)
+                app_main_template = MainTemplate(root_dir, ignore_list=ignore_list, config_data=config_data)
                 content = app_main_template.render()  # Assuming a render() method is available
                 f.write(content)
             elif file == 'config.py':
-                config_template = ConfigTemplate()
+                config_template = ConfigTemplate(config_data=config_data)
                 content = config_template.render()
                 f.write(content)
             elif file == 'Dockerfile':
-                dockerfile_template = DockerfileTemplate()
+                dockerfile_template = DockerfileTemplate(config_data=config_data)
                 content = dockerfile_template.render()
                 f.write(content)
             elif file == 'scheduler.py':

@@ -44,6 +44,8 @@ flask_session/
 
 # Ignore build folders
 /build/
-
+.neutrinoignore
+neutrinoconfig.yml
+neutrinoconfig.yaml
 
 

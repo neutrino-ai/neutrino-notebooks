@@ -1,11 +1,27 @@
 from neutrino_cli.compiler.templates.template import Template
 
+template = """
+numpy
+scipy
+scikit-learn
+matplotlib
+pandas
+PyYAML
+Jinja2
+gunicorn==20.1.0
+python-dotenv
+uvloop
+httptools
+fastapi
+uvicorn
+python-dotenv
+websockets
+APScheduler
+"""
+
 
 class RequirementsTemplate(Template):
     def __init__(self):
-        template_variables = {}
-        super().__init__('requirements_template', 'requirements.template', template_variables)
+        template_vars = {}
+        super().__init__(template_str=template, template_vars=template_vars)
 
-    @classmethod
-    def get_template_name(cls):
-        return 'requirements.template'

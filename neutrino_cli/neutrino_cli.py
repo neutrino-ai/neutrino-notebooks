@@ -6,6 +6,7 @@ import traceback
 from pathlib import Path
 
 import click
+import yaml
 from termcolor import colored
 
 from neutrino_cli.compiler.build_setup import hash_file, requirements_changed
@@ -13,7 +14,7 @@ from neutrino_cli.compiler.compiler import compile_notebooks_into_build, create_
     merge_project_requirements, \
     create_boilerplate_files_in_dir
 from neutrino_cli.compiler.ignore_handler import read_ignore_list
-from neutrino_cli.compiler.templates import NeutrinoIgnoreTemplate
+from neutrino_cli.compiler.templates import NeutrinoIgnoreTemplate, NeutrinoConfigTemplate
 
 
 @click.group()
@@ -23,23 +24,29 @@ def cli():
 
 
 @click.command()
-def init():
+@click.option('--name', default="NeutrinoProject", help='Your project name.')
+def init(name: str):
     """Initialize a new Neutrino project."""
     ignore_file_path = '.neutrinoignore'
+    neutrino_config_file_path = 'neutrinoconfig.yml'
 
     # Check if .neutrinoignore already exists
-    if os.path.exists(ignore_file_path):
-        print(colored(".neutrinoignore already exists.", 'yellow'))
+    if os.path.exists(ignore_file_path) or os.path.exists(neutrino_config_file_path):
+        print(colored("This project already contains a neutrinoconfig.yml", 'yellow'))
         return
 
     try:
         # Create .neutrinoignore and populate with default ignores
         with open(ignore_file_path, 'w') as f:
             ignore_template = NeutrinoIgnoreTemplate()
-            content = ignore_template.render()  # Assuming a render() method is available
+            content = ignore_template.render()
+            f.write(content)
+        with open(neutrino_config_file_path, 'w') as f:
+            config_template = NeutrinoConfigTemplate(project_name=name)
+            content = config_template.render()
             f.write(content)
 
-        print(colored(f"{ignore_file_path} created successfully.", 'green'))
+        print(colored(f"{neutrino_config_file_path} and {ignore_file_path} created successfully.", 'green'))
 
     except Exception as e:
         print(colored(f"An unexpected error occurred: {e}", 'red'))
@@ -50,6 +57,18 @@ def init():
 @click.option('--source', default=os.getcwd(), type=click.Path(exists=True), help='Path to the source folder.')
 def build(source: str):
     try:
+        config_data = None
+
+        # Look for configuration file
+        for file_name in ["neutrinoconfig.yml", "neutrino_config.yaml"]:
+            if os.path.exists(file_name):
+                with open(file_name, 'r') as f:
+                    config_data = yaml.safe_load(f)
+                break
+
+        if not config_data:
+            print(colored("neutrino_config.yaml not found. Using default settings.", 'yellow'))
+
         print(colored("Building Neutrino project...", 'cyan'))
 
         build_dir = './build'
@@ -60,7 +79,7 @@ def build(source: str):
 
         format_python_files_in_dir(build_dir)
         merge_project_requirements(source, build_dir)
-        create_boilerplate_files_in_dir(source, build_dir, ignore_list=ignore_list)
+        create_boilerplate_files_in_dir(source, build_dir, ignore_list=ignore_list, config_data=config_data)
 
         # Hash the requirements.txt file
         requirements_path = os.path.join(build_dir, '../requirements.txt')

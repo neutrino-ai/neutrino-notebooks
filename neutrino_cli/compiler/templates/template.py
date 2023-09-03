@@ -1,26 +1,16 @@
-import os
-
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment
 
 
 class Template:
-    def __init__(self, template_dir, template_name, template_variables):
-        this_dir = os.path.dirname(os.path.abspath(__file__))
-        templates_dir = os.path.join(this_dir, template_dir)
-        print(f"Templates Directory: {templates_dir}")
-        self.env = Environment(loader=FileSystemLoader(templates_dir))
-        self.template_name = template_name
-        self.template_variables = template_variables
-
-        if os.path.exists(os.path.join(templates_dir, template_name)):
-            print(f"Template {template_name} exists.")
-        else:
-            print(f"Template {template_name} does not exist.")
-
-    @classmethod
-    def get_template_name(cls) -> str:
-        raise NotImplementedError
+    def __init__(self, template_str: str, template_vars: dict):
+        self.env = Environment()
+        self.template_str = template_str  # Template stored as a string
+        self.template_vars = template_vars
 
     def render(self):
-        template = self.env.get_template(self.template_name)
-        return template.render(self.template_variables)
+        try:
+            template = self.env.from_string(self.template_str)
+            return template.render(self.template_vars)
+        except Exception as e:
+            print(f"Error rendering template: {e}")
+            raise

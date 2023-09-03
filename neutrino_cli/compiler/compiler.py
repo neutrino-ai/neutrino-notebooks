@@ -73,6 +73,17 @@ def merge_project_requirements(source_path: str, build_dir: str):
         merge_requirements(output_requirements, user_requirements, output_requirements)
 
 
-def create_boilerplate_files_in_dir(source_path: str, build_dir: str, ignore_list: list[str] = None):
+def create_boilerplate_files_in_dir(
+        source_path: str,
+        build_dir: str,
+        ignore_list: list[str] = None,
+        config_data: dict = None
+):
     boilerplate_files = ['main.py', 'config.py', 'Dockerfile', 'scheduler.py']
-    create_boilerplate_files(build_dir, boilerplate_files, root_dir=Path(source_path), ignore_list=ignore_list)
+    create_boilerplate_files(
+        build_dir,
+        boilerplate_files,
+        root_dir=Path(source_path),
+        ignore_list=ignore_list,
+        config_data=config_data
+    )
