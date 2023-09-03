@@ -1,4 +1,5 @@
 import re
+from typing import Union
 
 from termcolor import colored
 
@@ -10,10 +11,10 @@ class HttpCell:
     def __init__(
             self,
             http: str,
-            body: str | list[str],
-            resp: str | list[str],
-            query: str | list[str],
-            headers: str | list[str],
+            body: Union[str, list[str]],
+            resp: Union[str, list[str]],
+            query: Union[str, list[str]],
+            headers: Union[str, list[str]],
             endpoint: str,
             func_body: str
     ):
@@ -67,7 +68,7 @@ class HttpCell:
 
         is_optional = '?' in type_
         type_ = type_.replace('?', '').replace('!', '').strip()
-        return f"    {name.strip()}: {type_ + ' | None' if is_optional else type_}"
+        return f"    {name.strip()}: {'Union[' + type_ + ', None]' if is_optional else type_}"
 
     def _extract_url_params(self) -> list[tuple[any, str]]:
         return [(name, 'str') for name in re.findall(r"/{([\w]+)}", self.endpoint)]

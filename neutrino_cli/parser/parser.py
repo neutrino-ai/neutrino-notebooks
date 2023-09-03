@@ -43,7 +43,7 @@ def clean_source(lines: list[str]) -> tuple[list[str], list[str]]:
     return declaration_lines, source_lines
 
 
-def parse_cell(cell_content: dict, filepath: str) -> Cell | None:
+def parse_cell(cell_content: dict, filepath: str) -> Union[Cell, None]:
     """
     Parses a Jupyter notebook cell to determine its type and content.
 
@@ -52,7 +52,7 @@ def parse_cell(cell_content: dict, filepath: str) -> Cell | None:
     - filepath (str): The path of the file containing the cell, used for error reporting.
 
     Returns:
-    - Cell | None: Returns an object of type HttpCell, WebSocketCell, ScheduledCell, or CodeCell based on the
+    - Union[Cell, None]: Returns an object of type HttpCell, WebSocketCell, ScheduledCell, or CodeCell based on the
                    cell content. Returns None if the cell is not one of these types.
     """
     source = cell_content['source']
@@ -189,7 +189,7 @@ def parse_websocket_cell(declaration_lines: list[str], source_lines: list[str], 
             return None
 
 
-def parse_scheduled_cell(declaration_lines: list[str], source_lines: list[str], filepath: str) -> ScheduledCell | None:
+def parse_scheduled_cell(declaration_lines: list[str], source_lines: list[str], filepath: str) -> Union[ScheduledCell, None]:
     cron = None
     interval = None
 

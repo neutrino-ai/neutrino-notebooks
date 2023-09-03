@@ -56,7 +56,7 @@ def merge_requirements(stock_path: str, user_path: str, output_path: str) -> Non
     :param output_path: File path to the output requirements file
     """
 
-    def parse_requirements(file_path: str) -> defaultdict[str, str | None]:
+    def parse_requirements(file_path: str) -> defaultdict[str, Union[str, None]]:
         """
         Parse a requirements.txt file into a defaultdict.
 

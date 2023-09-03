@@ -134,7 +134,7 @@ class WebSocketCell:
 
         is_optional = '?' in type_
         type_ = type_.replace('?', '').replace('!', '').strip()
-        return f"    {name.strip()}: {type_ + ' | None' if is_optional else type_}"
+        return f"    {name.strip()}: {'Union[' + type_ + ', None]' if is_optional else type_}"
 
     @staticmethod
     def _generate_streaming_wrapper_no_input() -> list[str]:

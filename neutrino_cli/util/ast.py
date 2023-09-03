@@ -1,7 +1,8 @@
 import ast
+from typing import Union
 
 
-def get_function_name_from_ast(code: str) -> str | None:
+def get_function_name_from_ast(code: str) -> Union[str, None]:
     """Extract the function name from the given code using AST."""
     tree = ast.parse(code)
     for node in ast.walk(tree):
@@ -23,7 +24,7 @@ def get_function_param_types_from_ast(code: str) -> dict[str, str]:
     return param_types
 
 
-def get_function_args_from_ast(code: str) -> list[str] | None:
+def get_function_args_from_ast(code: str) -> Union[list[str], None]:
     """
     Extract the arguments of a function from the given code using AST.
 
