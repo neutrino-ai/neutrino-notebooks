@@ -47,5 +47,5 @@ class ConfigTemplate(Template):
         template_vars = {
             'api_port': config_data.get('api_port', 8080)
         }
-        super().__init__(template_str=template, template_vars=template_vars)
+        super().__init__(template_str=template, template_vars=template_vars, is_python=True)
 

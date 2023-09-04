@@ -32,7 +32,7 @@ def init(name: str):
 
     # Check if .neutrinoignore already exists
     if os.path.exists(ignore_file_path) or os.path.exists(neutrino_config_file_path):
-        print(colored("This project already contains a neutrinoconfig.yml", 'yellow'))
+        print(colored("This project already contains a neutrinoconfig.yml!", 'yellow'))
         return
 
     try:

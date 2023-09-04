@@ -79,7 +79,7 @@ def create_boilerplate_files_in_dir(
         ignore_list: list[str] = None,
         config_data: dict = None
 ):
-    boilerplate_files = ['main.py', 'config.py', 'Dockerfile', 'scheduler.py']
+    boilerplate_files = ['main.py', 'config.py', 'Dockerfile', 'scheduler.py', 'websocket_manager.py']
     create_boilerplate_files(
         build_dir,
         boilerplate_files,

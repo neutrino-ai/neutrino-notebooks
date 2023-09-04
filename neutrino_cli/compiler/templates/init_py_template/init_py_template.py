@@ -57,4 +57,4 @@ class InitPyTemplate(Template):
             "route_files": route_files,
         }
 
-        super().__init__(template_str=template, template_vars=template_vars)
+        super().__init__(template_str=template, template_vars=template_vars, is_python=True)

@@ -11,5 +11,5 @@ scheduler = AsyncIOScheduler()
 class SchedulerTemplate(Template):
     def __init__(self):
         template_vars = {}
-        super().__init__(template_str=template, template_vars=template_vars)
+        super().__init__(template_str=template, template_vars=template_vars, is_python=True)
 

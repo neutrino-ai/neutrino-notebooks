@@ -6,3 +6,4 @@ from .requirements_template import RequirementsTemplate
 from .scheduler_template import SchedulerTemplate
 from .config_template import ConfigTemplate
 from .neutrino_config_template import NeutrinoConfigTemplate
+from .websockets_manager_template import WebsocketsManagerTemplate

@@ -250,11 +250,13 @@ def compile_notebook_to_py(filepath: str) -> str:
     cells = parse_notebook_cells(filepath)
 
     output_lines = [
-        'from fastapi import APIRouter, HTTPException, WebSocket\n',
-        'from pydantic import BaseModel, ValidationError\n',
-        'from scheduler import scheduler\n',
-        'from typing import List, Dict, Optional, Union, Any, AsyncGenerator, Callable\n',
+        'from fastapi import APIRouter, HTTPException, WebSocket',
+        'from pydantic import BaseModel, ValidationError',
+        'from scheduler import scheduler',
+        'from typing import List, Dict, Optional, Union, Any, AsyncGenerator, Callable',
+        'import uuid',
         'import json\n',
+        'from websocket_manager import manager\n\n\n'
         'router = APIRouter()\n',
     ]
     for cell in cells:

@@ -70,4 +70,4 @@ class MainTemplate(Template):
             "version": config_data.get('version', '0.0.1'),
         }
 
-        super().__init__(template_str=template, template_vars=template_vars)
+        super().__init__(template_str=template, template_vars=template_vars, is_python=True)
