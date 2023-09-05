@@ -1,11 +1,32 @@
 # Neutrino Notebooks
 
-Neutrino Notebooks allows you to seamlessly build and deploy complex workflows using simple and expressive syntax.
+Neutrino Notebooks lets you write Jupyter Notebooks that can be easily compiled into a FastAPI application.
 
-It allows you to package your notebooks ...
+It allows you to define cells with a declarative syntax which will compile your cell into an HTTP endpoint, a 
+websocket endpoint, or a scheduled task.
 
-When you build a Neutrino Notebook, it will automatically compile the project into a FastAPI application with a docker 
-image that can be deployed to any cloud provider.
+**Example**
+```python
+"""
+@HTTP
+POST /api/linear-regression
+body: x:list[float], y:list[float]
+"""
+def simple_linear_regression(x: list[float], y: list[float]):
+    slope, intercept, _, _, _ = linregress(x, y)
+    return {'slope': slope, 'intercept': intercept}
+```
+
+
+### Docs
+
+[docs.neutrinolabs.dev](https://docs.neutrinolabs.dev/)
+
+---
+
+### Installation
+
+`pip install neutrino-cli`
 
 ---
 
@@ -30,15 +51,42 @@ This command will run the compiled application locally using docker.
 
 ---
 
-### HTTP Cells
-An HTTP cell starts with the declarative `@HTTP` 
+## HTTP Cells
+HTTP cells allow you to use the declarative `@HTTP` to expose cells as HTTP endpoints.
 
-It follows with an HTTP verb (GET, POST, PUT, DELETE, PATCH) and the API endpoint URL. 
+### Syntax
+
+HTTP cells start with an `@HTTP` declarative. It follows with an HTTP verb (GET, POST, PUT, DELETE, PATCH) and the API endpoint URL. 
 Additional settings like Body, Resp, Query, and Headers can be specified using YAML-like syntax.
+
+```
+"""
+@HTTP
+http_method /url_endpoint
+[body]
+[query]
+[resp]
+[headers]
+"""
+```
+
+### Parameters
+
+- `http_method`: The HTTP verb (e.g., GET, POST, PUT, DELETE).
+- `url_endpoint`: API endpoint URL.
+
+#### Optional Parameters
+
+- `body`: The request body.
+- `query`: Query parameters.
+- `resp`: Expected response fields.
+- `headers`: Required HTTP headers.
+
+Fields in square brackets are optional.
 
 **Example**  
 Simple route with no parameters
-```
+```python
 """
 @HTTP
 GET /api/hello-world
@@ -49,7 +97,7 @@ def hello_world():
 
 **Example**  
 Route with url parameters and response definition to calculate the correlation between two datasets
-```
+```python
 """
 @HTTP
 GET /api/correlation/{dataset1}/{dataset2}
@@ -63,7 +111,7 @@ def calculate_correlation(dataset1: str, dataset2: str):
 ```
 **Example**  
 Route with query parameters and response definition to filter a DataFrame
-```
+```python
 """
 @HTTP
 GET /api/filter-dataframe
@@ -93,7 +141,7 @@ def filter_dataframe(column: str, value: str):
 **Example**  
 Route with json body parameters to perform a linear regression
 
-```
+```python
 """
 @HTTP
 POST /api/linear-regression
@@ -107,7 +155,7 @@ def simple_linear_regression(x: list[float], y: list[float]):
 **Example**  
 Route with json body parameters and response definition to perform a k-means clustering
 
-```
+```python
 """
 @HTTP
 POST /api/kmeans
@@ -121,35 +169,66 @@ def kmeans_clustering(data: list[list[float]], n_clusters: int):
     return {'centroids': centroids.tolist()}
 ```
 
-### Parameters
-
-**http:** The HTTP verb for the request (GET, POST, PUT, DELETE, PATCH).  
-**endpoint:** The API endpoint URL.  
-**body:** The request body fields and their types.  
-**resp:** The expected response fields and their types.  
-**query:** The specified query parameters for the request. *i.e ?key=value&key2=value2*   
-**headers:** HTTP headers required for the request. *i.e Authorization: Bearer {token}* 
-
 ---
 
-### Websockets Cells
-A Websockets cell starts with the declarative `@WS` 
+## Websockets Cells
+WebSocket cells in Neutrino Notebooks empower you to establish real-time, two-way communication between your
+notebook and external clients or services. These cells make it easy to set up persistent connections, allowing
+for real-time data streaming and interactive features.
 
-It defines a WebSocket endpoint that clients can connect to for real-time, two-way communication between the client
-and server. The WebSocket cell contains a function that takes an event argument, representing incoming data from 
-the client. The function can process this data and send back a response, which the client will receive in real-time. 
-The function body can include any logic required for the WebSocket operation.
+### Syntax
 
+WebSocket cells start with an `@WS` declarative. They usually contain an asynchronous Python function designed to
+handle WebSocket events.
 
-**Example**  
-Route with url parameters and response definition to calculate the correlation between two datasets
 ```
 """
-@WS /api/chatbot
+@WS /ws_endpoint
+[type]
+[message]
 """
-async def real_time_chatbot(event: str):
+```
+
+### Parameters
+- `/ws_endpoint`: The WebSocket endpoint URL, which the server listens to.
+
+#### Optional Parameters
+
+- `type`: The type of WebSocket. Can be `event` or `stream`. Defaults to `event`.
+- `message`: The input message format of the WebSocket endpoint.
+
+
+Fields in square brackets are optional.
+
+
+### Event-Based WebSockets
+A basic WebSocket simply receives an event and returns a response. Functions must contain the `event` parameter to
+handle the event message received.
+
+#### Basic Event-Based WebSocket
+
+**Example**
+
+```python
+"""
+@WS /ws/hello-ws
+"""
+async def hello_world(event: str):
+    return event
+```
+
+
+#### Simple AI Chat Bot
+
+**Example**
+
+```python
+"""
+@WS /ws/chat
+"""
+async def real_time_chat(event: str):
     user_message = event.get('message')
-    
+
     openai.api_key = os.environ.get('OPENAI_API_KEY')
     completion = openai.ChatCompletion.create(
         model = "gpt-3.5-turbo",
@@ -161,20 +240,269 @@ async def real_time_chatbot(event: str):
         ]
     )
     response = completion.choices[0].message
-    
-    return {'response': response}
+
+    return {'event: 'response','message': response}
 ```
+
+### Streaming WebSockets
+Streaming WebSockets constantly yield data in a loop. Use `type: stream` to indicate a streaming WebSocket.
+
+
+#### Streaming a Stock Price
+
+**Example**
+
+```python
+"""
+@WS /ws/stream
+type: stream
+"""
+async def stream_stock_price():
+    ticker = yf.Ticker("AAPL")
+    ticker_info = ticker.history(period="1d")
+    price = ticker_info["Close"].iloc[-1]
+
+    yield price
+    await asyncio.sleep(5)
+```
+
+
+### Streaming WebSockets with Message Input
+Some WebSockets require input parameters for conditional logic or personalization.
+
+
+#### Streaming a Custom Stock Price
+
+**Example**
+
+```python
+"""
+@WS /ws/stream-with-input
+type: stream
+message: event:str, ticker:str
+validate: true
+"""
+async def stream_with_input(event: dict):
+    ticker = yf.Ticker(event.get("ticker", "AAPL"))
+    ticker_info = ticker.history(period="1d")
+    price = ticker_info["Close"].iloc[-1]
+
+    yield price
+
+    await asyncio.sleep(5)
+```
+
+
+### Message Format Validation
+Message format validation is disabled by default. You can disable it by setting `validate: True`.
+Validation will check if the message received matches the message format defined in the `message` parameter, returning
+an error if it does not.
+
+
+```python
+"""
+@WS /ws-stream-with-input
+type: stream
+message: event:str, ticker:str
+validate: True
+"""
+async def my_ws_route_with_input(event: dict):
+    ticker = yf.Ticker(event.get("ticker", "AAPL"))
+    ticker_info = ticker.history(period="1d")
+    price = ticker_info["Close"].iloc[-1]
+    yield price
+    await asyncio.sleep(5)
+```
+
+### Managed Connections
+
+Websockets cells support managed connections, meaning that a response can be sent either to a specific client, all
+clients in a room, or broadcasted to all connected clients.
+
+
+#### Broadcasting to a room
+
+**Example**
+
+In this example, every message sent will be broadcasted to all clients in the room.
+
+```python
+"""
+@WS /ws/join-room/{room_id}
+"""
+async def join_room(event: str, room_id: str):
+    return event, {"room_id": room_id}
+```
+
+#### Sending a Message to a Specific Client
+
+**Example**
+
+In this example, a client connects with a given client_id, the client can then message another client by specifying the
+target client_id in the event.
+
+```python
+"""
+@WS /ws/send-message/{client_id}
+"""
+async def send_message(event: str, client_id: str):
+    event = json.loads(event)
+    target = event.get("target", None)
+    message = event.get("message", None)
+    data = {
+        "message": message,
+        "from": client_id,
+    }
+
+    return data, {"client_id": target}
+```
+
+Alternatively, when sending messages to a specific client, you can simply return the response and client_id as a tuple
+
+```python
+"""
+@WS /ws/send-message/{client_id}
+"""
+async def send_message(event: str, client_id: str):
+    event = json.loads(event)
+    target = event.get("target", None)
+    message = event.get("message", None)
+    data = {
+        "message": message,
+        "from": client_id,
+    }
+
+    return data, target
+```
+
+#### Broadcasting to All Clients
+
+**Example**
+
+By simply returning the response without additional parameters, the response will be broadcasted to all connected
+clients.
+
+```python
+"""
+@WS /ws/broadcast-all
+"""
+async def broadcast_all(event: str):
+    return event
+```
+
+
+### Error Handling
+
+Error messages that will be sent to the client without closing the connection can just be returned from the function
+normally.
+
+```python
+"""
+@WS /handle-error
+"""
+async def handle_error(event: str):
+    try:
+        # Your logic here
+    except Exception as e:
+        return {'error': str(e)}
+```
+
+#### Custom Errors
+
+Errors that should close the connection can be defined by raising an appropriate exception or defining a custom
+exception.
+
+**Example:**
+
+```python
+
+class CustomException(Exception):
+    status_code = 400
+    message = "This is a custom error message!"
+```
+
+```python
+"""
+@WS /custom-error
+"""
+async def custom_error(event: str):
+    raise CustomException()
+```
+
 
 ---
 
-### Scheduled Cells
-Scheduled cells start with the declarative `@SCHEDULE` and define a code block that will be executed based on 
-either a cron schedule or a time interval. 
-You can set the cron schedule or interval in the cell comments, using the cron and interval keys. The function 
-inside a Scheduled cell takes no arguments and performs actions at specified time intervals or cron schedules.
+## Scheduled Cells
+Scheduled Cells allow you to schedule the execution of code blocks or functions using cron or interval-based timing.
+These cells are identified by the ``@SCHEDULE` declaration at the top of the cell. {{ className: 'lead' }}
 
-**Example:** Interval scheduled task to retrieve csv from s3 bucket and run analysis
+### Syntax
+
+The declaration lines following `@SCHEDULE` define the schedule in either cron format or interval format. You must specify either `cron` or `interval`, not both.
+
 ```
+"""
+@SCHEDULE
+[interval]
+[cron]
+"""
+```
+
+#### Parameters
+
+- `interval`: the time period between task execution.
+- `cron`: The cron schedule.
+
+
+### CRON-based Scheduling
+
+For cron-based scheduling, use the key `cron` followed by the cron timing fields, in the following order:
+
+```
+second minute hour day month day_of_week
+```
+
+**Example:**
+
+```python
+"""
+@SCHEDULE
+cron: * * * * * *
+"""
+def scheduled_function():
+    print("This will run every second")
+```
+
+This will execute the code every second.
+
+
+### Interval-based Scheduling
+
+For interval-based scheduling, use the key `interval` followed by the duration. The duration can be in seconds (`s`), minutes (`m`), or hours (`h`).
+
+Example:
+
+```python
+"""
+@SCHEDULE
+interval: 10s
+"""
+def scheduled_function():
+    print("This will run every 10 seconds")
+```
+
+This will execute the code every 10 seconds.
+
+
+### Example Use Cases
+
+Here are some examples to showcase the diverse capabilities of HTTP cells in Neutrino Notebooks.
+
+#### Periodically Retrieving Data from S3 and Running Analysis
+
+**Example**
+
+```python
 """
 @SCHEDULE
 interval: 2h
@@ -184,7 +512,7 @@ def scheduled_data_analysis():
     s3 = boto3.client('s3')
     s3.download_file('my-bucket', 'data/new_data.csv', 'new_data.csv')
     df = pd.read_csv('new_data.csv')
-    
+
     # Run analysis and check condition
     analyzed_df = run_analysis(df)
     if analyzed_df['some_column'].mean() > 10:
@@ -193,24 +521,29 @@ def scheduled_data_analysis():
         store_in_db(analyzed_df)
 ```
 
-**Example:** Cron Scheduled Task to Fetch Stock Prices  
-Fetch stock prices for a given list of tickers every weekday at 9:30 am.
 
-```
+#### CRON Schedule to Fetch Stock Prices
+
+**Example**
+
+```python
 """
 @SCHEDULE
 cron: 0 30 9 * * 1-5
 """
 def fetch_stock_prices():
     tickers = ["AAPL", "GOOGL", "AMZN"]
-    # Assuming fetch_prices is a function that fetches stock prices
-    prices = fetch_prices(tickers)
-    store_prices_in_db(prices)
+    data = {ticker: yf.Ticker(ticker).history(period="1d")['Close'][0] for ticker in tickers}
+    print(data)
+    store_prices_in_db(data) # assuming store_prices_in_db is an implemented function
 ```
 
 
-**Example:** Cron scheduled task to fetch for weekly model retraining
-```
+#### CRON Scheduled Task for Weekly Model Retraining
+
+**Example**
+
+```python
 """
 @SCHEDULE
 cron: 0 0 1 * * 1
