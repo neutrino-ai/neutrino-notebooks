@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
+from neutrino_cli.__version__ import __version__
+
 
 setup(
     name='neutrino-cli',
-    version='0.1.7',
+    version=__version__,
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
