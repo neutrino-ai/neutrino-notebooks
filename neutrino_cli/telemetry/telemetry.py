@@ -83,14 +83,11 @@ class Telemetry:
             payload["traceback"] = traceback
 
         try:
-            print("payload", payload)
             response = requests.post(
                 f"{ANALYTICS_URL}/api/cli-analytics/track-cli-action",
                 json=payload,
                 headers={'Content-Type': 'application/json'},
                 timeout=1,
             )
-            print("response", response.json())
         except Exception as e:
-            print("exception", str(e))
             pass
