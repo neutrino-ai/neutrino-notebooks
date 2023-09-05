@@ -15,7 +15,6 @@ build/
 *.sqlite3
 
 # Ignore virtual environments
-.env/
 venv/
 env/
 
@@ -38,13 +37,14 @@ Thumbs.db
 
 # Ignore FastAPI specific
 instance/
-*.env
 *.flaskenv
 flask_session/
 
 # Ignore database
 /db/
 /data/
+/.chroma
+.chroma
 
 .gitignore
 .neutrinoignore
