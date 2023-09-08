@@ -47,7 +47,7 @@ class MainTemplate(Template):
         import_root_routers = []
         register_root_routers = []
 
-        root_ipynbs = [file for file in root_dir.glob("*.ipynb") if not should_ignore_file(file.name, ignore_list)]
+        root_ipynbs = [file for file in root_dir.glob("*.ipynb") if self.is_valid_ipynb_file(file.name, ignore_list)]
         for root_ipynb in root_ipynbs:
             ipynb_name = to_snake_case(root_ipynb.stem)
             router_name = f"{ipynb_name}_router"
@@ -55,7 +55,7 @@ class MainTemplate(Template):
             register_root_routers.append(f"app.include_router({router_name})")
 
         for subdir in root_dir.iterdir():
-            if subdir.is_dir() and not should_ignore_file(subdir.name, ignore_list):
+            if subdir.is_dir() and self.is_valid_subdir(subdir.name, ignore_list):
                 subdir_name = to_snake_case(subdir.name)
 
                 dir_router_name = f"{subdir_name}_router"
@@ -71,3 +71,15 @@ class MainTemplate(Template):
         }
 
         super().__init__(template_str=template, template_vars=template_vars, is_python=True)
+
+    @staticmethod
+    def is_valid_ipynb_file(file_name: str, ignore_list: list[str]) -> bool:
+        return not should_ignore_file(file_name, ignore_list) and not file_name.endswith('sandbox.ipynb')
+
+    @staticmethod
+    def is_valid_subdir(subdir_name: str, ignore_list: list[str]) -> bool:
+        return (
+                not should_ignore_file(subdir_name, ignore_list) and
+                not subdir_name.startswith('.') and
+                not subdir_name.endswith('sandbox')
+        )
