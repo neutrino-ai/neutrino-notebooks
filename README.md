@@ -6,8 +6,6 @@
   Neutrino Notebooks
 </h1>
 
----
-
 ![GitHub stars](https://img.shields.io/github/stars/neutrino-ai/neutrino-notebooks)
 ![GitHub issues](https://img.shields.io/github/issues/neutrino-ai/neutrino-notebooks)
 
