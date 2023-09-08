@@ -1,8 +1,10 @@
-<div style="display: flex; align-items: center; justify-content: center; font-family: 'Ubuntu', sans-serif; margin-top: 2em">
-  <img src="https://raw.githubusercontent.com/neutrino-ai/neutrino-notebooks/main/neutrino.png" style="width: 100px; height: auto; margin-right: 20px; align-self: center;">
-  <div style="font-size: 2em;">neutrino notebooks</div>
-</div>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/neutrino-ai/neutrino-notebooks/main/neutrino.png" width="200">
+</p>
 
+<h1 align="center">
+  Neutrino Notebooks
+</h1>
 
 ---
 
