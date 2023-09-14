@@ -8,3 +8,5 @@ from .config_template import ConfigTemplate
 from .neutrino_config_template import NeutrinoConfigTemplate
 from .websockets_manager_template import WebsocketsManagerTemplate
 from .start_script_template import StartScriptTemplate
+from .gitignore_template import GitIgnoreTemplate
+from .pre_commit_hook_template import PreCommitHookTemplate

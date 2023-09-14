@@ -3,6 +3,7 @@ import os
 import uuid
 from pathlib import Path
 import requests
+import platform
 from neutrino_cli.__version__ import __version__
 
 ANALYTICS_URL = "https://neutrino-notebooks-analytics-b8d66902d82c.herokuapp.com"
@@ -64,16 +65,17 @@ class Telemetry:
         self.config["include_traceback"] = status
         self.save_config()
 
-    def send(self, action: str, success: bool, error: str = None, traceback: str = None):
+    def send(self, action: str, success: bool, error: str = None, traceback: str = None, override_user_id: str = None):
         """Send telemetry data if enabled."""
         if not self.is_telemetry_enabled():
             return
 
         payload = {
-            "user_id": self.get_cli_id(),
+            "user_id": self.get_cli_id() if not override_user_id else override_user_id,
             "action": action,
             "version": __version__,
             "success": success,
+            "os": platform.platform(),
         }
 
         if error:

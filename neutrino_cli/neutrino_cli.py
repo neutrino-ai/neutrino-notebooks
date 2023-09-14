@@ -14,7 +14,8 @@ from neutrino_cli.compiler.compiler import compile_notebooks_into_build, create_
     merge_project_requirements, \
     create_boilerplate_files_in_dir
 from neutrino_cli.compiler.ignore_handler import read_ignore_list
-from neutrino_cli.compiler.templates import NeutrinoIgnoreTemplate, NeutrinoConfigTemplate
+from neutrino_cli.compiler.templates import NeutrinoIgnoreTemplate, NeutrinoConfigTemplate, GitIgnoreTemplate, \
+    PreCommitHookTemplate
 from neutrino_cli.telemetry import Telemetry, telemetry
 
 
@@ -30,6 +31,8 @@ def init(name: str):
     """Initialize a new Neutrino project."""
     ignore_file_path = '.neutrinoignore'
     neutrino_config_file_path = 'neutrinoconfig.yml'
+    git_folder_path = '.git'
+    git_ignore_file_path = '.gitignore'
     success = True
 
     # Check if .neutrinoignore already exists
@@ -38,15 +41,53 @@ def init(name: str):
         return
 
     try:
+        # Check if .git folder exists, if not, run git init
+        if not os.path.exists(git_folder_path):
+            subprocess.run(['git', 'init'])
+            print(colored(".git initialized.", 'green'))
+
+        # Create a pre-commit hook
+        pre_commit_hook_path = '.git/hooks/pre-commit'
+        with open(pre_commit_hook_path, 'w') as f:
+            hook_template = PreCommitHookTemplate()
+            content = hook_template.render()
+            f.write(content)
+            print(colored("Git pre-commit hook created.", 'green'))
+
+        # Make the pre-commit hook executable
+        subprocess.run(['chmod', '+x', pre_commit_hook_path])
+        print(colored("Git pre-commit hook made executable.", 'green'))
+
+        # Check if .gitignore exists, if not, create one
+        if not os.path.exists(git_ignore_file_path):
+            with open(git_ignore_file_path, 'w') as f:
+                git_ignore_template = GitIgnoreTemplate()
+                content = git_ignore_template.render()
+                f.write(content)
+            print(colored(".gitignore created.", 'green'))
+        else:
+            # If .gitignore exists, append /build/ to it
+            with open(git_ignore_file_path, 'a') as f:
+                f.write("\n# Neutrino\n/build/\n")
+            print(colored(".gitignore updated.", 'green'))
+
         # Create .neutrinoignore and populate with default ignores
         with open(ignore_file_path, 'w') as f:
             ignore_template = NeutrinoIgnoreTemplate()
             content = ignore_template.render()
             f.write(content)
+
+        # Create neutrinoconfig.yml
         with open(neutrino_config_file_path, 'w') as f:
             config_template = NeutrinoConfigTemplate(project_name=name)
             content = config_template.render()
             f.write(content)
+
+        # Create requirements.txt if it doesn't exist
+        if not os.path.exists('requirements.txt'):
+            with open('requirements.txt', 'w') as f:
+                f.write("# Add your package requirements here")
+                print(colored("requirements.txt created.", 'green'))
 
         print(colored(f"{neutrino_config_file_path} and {ignore_file_path} created successfully.", 'green'))
 
@@ -61,7 +102,8 @@ def init(name: str):
 
 @click.command()
 @click.option('--source', default=os.getcwd(), type=click.Path(exists=True), help='Path to the source folder.')
-def build(source: str):
+@click.option('--pipeline', default=False, type=bool, help='Is this an automated build for a deployment pipeline?')
+def build(source: str, pipeline: bool):
     success = False
     error_message = None
     traceback_str = None
@@ -117,7 +159,13 @@ def build(source: str):
         traceback_str = traceback.format_exc()
     finally:
         print(colored("Build process finished.", 'yellow'))
-        telemetry.send("build", success=success, error=error_message, traceback=traceback_str)
+        telemetry.send(
+            "build",
+            success=success,
+            error=error_message,
+            traceback=traceback_str,
+            override_user_id="github-build-pipeline" if pipeline else None
+        )
 
 
 @click.command()

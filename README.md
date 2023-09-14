@@ -8,6 +8,8 @@
 
 ![GitHub stars](https://img.shields.io/github/stars/neutrino-ai/neutrino-notebooks)
 ![GitHub issues](https://img.shields.io/github/issues/neutrino-ai/neutrino-notebooks)
+![PyPI](https://img.shields.io/pypi/v/neutrino-cli.svg)
+[![Join the Slack](https://img.shields.io/badge/Slack-Join%20the%20Community-blue?logo=slack)](https://join.slack.com/t/neutrinocommunity/shared_invite/zt-2330v708n-koZBAvh04qQSHv3f9RUgVQ)
 
 
 
@@ -17,7 +19,29 @@ Neutrino Notebooks lets you write Jupyter Notebooks that can be easily compiled 
 It allows you to define cells with a declarative syntax which will compile your cell into an HTTP endpoint, a 
 websocket endpoint, or a scheduled task.
 
-**Example**
+**Example: Generate a Startup Idea and Send a Pitch Email Every 3 Hours**
+```python
+"""
+@SCHEDULE
+interval: 3h
+"""
+try:
+    idea = generate_idea()
+    tldr = generate_tldr_and_summary(idea)
+    subject = generate_subject(tldr)
+    
+    email_sender.send_email(
+        source="Neutrino IdeaBot<idea-bot@neutrinoapp.com>",
+        recipients=["myemail@gmail.com"],
+        subject=f"Neutrino IdeaBot: {subject}",
+        body=f"<html><body>{tldr}<br><br><h2>Explanation:</h2><br>{idea}</body></html>"
+    )
+    print("Successfully sent email!")
+except Exception as e:
+    print("Error: ", e)
+```
+
+**Example: Expose a Simple Linear Regression as an HTTP Endpoint**
 ```python
 """
 @HTTP

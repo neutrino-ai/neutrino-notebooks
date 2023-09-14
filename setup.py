@@ -18,6 +18,7 @@ setup(
         'Jinja2',
         'PyYAML',
         'requests',
+        'nbstripout',
     ],
     entry_points={
         'console_scripts': [
