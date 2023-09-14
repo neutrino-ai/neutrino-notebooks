@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Union
 
 from neutrino_cli.compiler.templates import DockerfileTemplate, SchedulerTemplate, ConfigTemplate, MainTemplate, \
-    WebsocketsManagerTemplate
+    WebsocketsManagerTemplate, StartScriptTemplate
 
 
 def hash_file(file_path: str) -> str:
@@ -121,4 +121,8 @@ def create_boilerplate_files(build_dir: str, boilerplate_files: list[str], root_
             elif file == 'websocket_manager.py':
                 manager_template = WebsocketsManagerTemplate()
                 content = manager_template.render()
+                f.write(content)
+            elif file == 'start.sh':
+                start_template = StartScriptTemplate()
+                content = start_template.render()
                 f.write(content)

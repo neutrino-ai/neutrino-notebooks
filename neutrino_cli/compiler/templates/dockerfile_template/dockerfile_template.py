@@ -19,8 +19,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
-# Run Uvicorn server
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "{{api_port}}"]
+# Add execution permission to your shell script and run it
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+CMD ["/start.sh"]
 """
 
 

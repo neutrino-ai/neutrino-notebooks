@@ -7,3 +7,4 @@ from .scheduler_template import SchedulerTemplate
 from .config_template import ConfigTemplate
 from .neutrino_config_template import NeutrinoConfigTemplate
 from .websockets_manager_template import WebsocketsManagerTemplate
+from .start_script_template import StartScriptTemplate

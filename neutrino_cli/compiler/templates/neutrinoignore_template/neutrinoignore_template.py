@@ -48,6 +48,8 @@ flask_session/
 
 .gitignore
 .neutrinoignore
+.github/
+.git/
 """
 
 

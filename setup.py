@@ -17,6 +17,7 @@ setup(
         'termcolor',
         'Jinja2',
         'PyYAML',
+        'requests',
     ],
     entry_points={
         'console_scripts': [
