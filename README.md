@@ -10,6 +10,7 @@
 ![GitHub issues](https://img.shields.io/github/issues/neutrino-ai/neutrino-notebooks)
 ![PyPI](https://img.shields.io/pypi/v/neutrino-cli.svg)
 [![Join the Slack](https://img.shields.io/badge/Slack-Join%20the%20Community-blue?logo=slack)](https://join.slack.com/t/neutrinocommunity/shared_invite/zt-2330v708n-koZBAvh04qQSHv3f9RUgVQ)
+[![Documentation](https://img.shields.io/badge/docs-View%20Documentation-blue)](https://docs.neutrinolabs.dev/)
 
 
 
@@ -19,7 +20,31 @@ Neutrino Notebooks lets you write Jupyter Notebooks that can be easily compiled 
 It allows you to define cells with a declarative syntax which will compile your cell into an HTTP endpoint, a 
 websocket endpoint, or a scheduled task.
 
-**Example: Generate a Startup Idea and Send a Pitch Email Every 3 Hours**
+---
+
+### Features
+
+- Expose cells as HTTP or websockets endpoints with comment declaratives like `@HTTP` and `@WS`
+
+- Periodically run cells as scheduled tasks for simple data pipelines with `@SCHEDULE`
+
+- Automatic routing based on filename and directory structure, sort of similar to NextJs.
+
+- Ignore sandbox files by naming them ‘_sandbox’
+
+Compile your notebooks with `neutrino build`, which creates a /build folder with a dockerized FastAPI app for local testing or deployment.
+
+---
+
+### Getting Started
+
+`pip install neutrino-cli`
+
+---
+
+### Examples
+
+**Generate a Startup Idea and Send a Pitch Email Every 3 Hours**
 ```python
 """
 @SCHEDULE
@@ -41,7 +66,7 @@ except Exception as e:
     print("Error: ", e)
 ```
 
-**Example: Expose a Simple Linear Regression as an HTTP Endpoint**
+**Expose a Simple Linear Regression as an HTTP Endpoint**
 ```python
 """
 @HTTP
@@ -53,16 +78,12 @@ def simple_linear_regression(x: list[float], y: list[float]):
     return {'slope': slope, 'intercept': intercept}
 ```
 
+---
+
 
 ### Docs
 
 [docs.neutrinolabs.dev](https://docs.neutrinolabs.dev/)
-
----
-
-### Installation
-
-`pip install neutrino-cli`
 
 ---
 
