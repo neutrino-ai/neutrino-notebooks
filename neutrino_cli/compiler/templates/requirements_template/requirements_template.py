@@ -1,4 +1,5 @@
 from neutrino_cli.compiler.templates.template import Template
+import platform
 
 template = """
 numpy
@@ -10,7 +11,6 @@ PyYAML
 Jinja2
 gunicorn==20.1.0
 python-dotenv
-uvloop
 httptools
 fastapi
 uvicorn
@@ -22,6 +22,9 @@ APScheduler
 
 class RequirementsTemplate(Template):
     def __init__(self):
+        # Detect OS
+        if platform.system() != "Windows":  # Mac OS
+            template += "\nuvloop"
+
         template_vars = {}
         super().__init__(template_str=template, template_vars=template_vars)
-
