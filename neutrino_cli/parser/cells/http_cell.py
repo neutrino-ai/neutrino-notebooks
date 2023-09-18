@@ -99,9 +99,14 @@ class HttpCell:
             return "# Missing HTTP method or endpoint."
 
         func_name = get_function_name_from_ast(self.func_body)
-        pascal_func_name = snake_to_pascal(func_name) if func_name else None
-        model_names = [f"{pascal_func_name}{suffix}" if pascal_func_name else suffix for suffix in
-                       ["RequestBody", "ResponseModel"]]
+        is_already_function = func_name is not None
+
+        if func_name is None:
+            func_name = f"generated_http_func_{HttpCell._counter}"
+            HttpCell._counter += 1
+
+        pascal_func_name = snake_to_pascal(func_name)
+        model_names = [f"{pascal_func_name}{suffix}" for suffix in ["RequestBody", "ResponseModel"]]
 
         endpoint_def = []
         for model_name, fields in zip(model_names, [self.body, self.resp]):
@@ -130,5 +135,10 @@ class HttpCell:
             "        else:",
             "            raise HTTPException(status_code=500, detail=f'Internal Server Error: {str(e)}')"
         ])
-        endpoint_def.append(self.func_body)
+
+        if not is_already_function:
+            endpoint_def.append(f"async def {func_name}():")
+            endpoint_def.append("    " + self.func_body.replace("\n", "\n    "))
+        else:
+            endpoint_def.append(self.func_body)
         return "\n".join(endpoint_def)
